@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三张表财务模型 · 通用制造业示例（学习版）</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2937; --sub:#6b7280;
+    --line:#e5e7eb; --accent:#2563eb; --accent2:#0e7490; --good:#16a34a;
+    --warn:#d97706; --bad:#dc2626; --soft:#eef2ff;
+    --rev:#2563eb; --net:#0e7490; --cash:#16a34a;
+    --cfo:#2563eb; --cfi:#dc2626; --cff:#16a34a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;font-size:14px}
+  header{background:linear-gradient(135deg,#1e3a8a,#0e7490);color:#fff;padding:22px 26px}
+  header h1{margin:0 0 4px;font-size:21px}
+  header p{margin:0;opacity:.9;font-size:13px}
+  .wrap{max-width:1240px;margin:0 auto;padding:18px}
+  .grid{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+  .grid>div{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow-y:auto;
+    padding-right:6px;overscroll-behavior:contain}
+  .grid>div::-webkit-scrollbar{width:8px}
+  .grid>div::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}
+    .grid>div{position:static;max-height:none;overflow-y:visible;padding-right:0}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .card h2{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+  .card h2 .tag{font-size:11px;font-weight:600;color:var(--accent);background:var(--soft);
+    padding:2px 8px;border-radius:20px}
+  .grp{margin-bottom:14px}
+  .grp-title{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.5px;
+    border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px}
+  .row{display:flex;align-items:center;justify-content:space-between;margin:6px 0}
+  .row label{font-size:13px;color:#374151}
+  .row input{width:90px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;
+    font-size:13px;text-align:right;color:var(--ink)}
+  .row input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  button{cursor:pointer;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+  .btn-ghost2{background:#fff;color:var(--sub);border:1px solid var(--line)}
+  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .tab{padding:7px 14px;border-radius:20px;background:#fff;border:1px solid var(--line);
+    font-size:13px;font-weight:600;color:var(--sub);cursor:pointer}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
+  th:first-child,td:first-child{text-align:left;white-space:nowrap}
+  thead th{background:#f8fafc;color:var(--sub);font-weight:600}
+  .sub-total{font-weight:700;background:#fbfcfe}
+  .total{font-weight:800;background:var(--soft);color:var(--accent2)}
+  .neg{color:var(--bad)}
+  .pos{color:var(--good)}
+  .note{font-size:12px;color:var(--sub);margin-top:8px}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:560px){.checks{grid-template-columns:1fr}}
+  .check{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    display:flex;align-items:center;gap:10px}
+  .check .ic{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
+    justify-content:center;font-weight:800;color:#fff;font-size:14px;flex:none}
+  .check .ok{background:var(--good)} .check .no{background:var(--bad)}
+  .check small{color:var(--sub);display:block;font-size:11px}
+  .ratios{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:4px}
+  .ratio{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .ratio .k{font-size:12px;color:var(--sub)}
+  .ratio .v{font-size:18px;font-weight:800;margin-top:2px}
+  .pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px}
+  .pill.g{background:#dcfce7;color:var(--good)} .pill.y{background:#fef3c7;color:var(--warn)}
+  .pill.r{background:#fee2e2;color:var(--bad)}
+  .chart-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.chart-wrap{grid-template-columns:1fr}}
+  .legend{font-size:12px;color:var(--sub);margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
+  .intro p{margin:6px 0}
+  .analogy{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:13px;margin:10px 0}
+  .analogy b{color:var(--accent2)}
+  svg text{font-family:inherit}
+  details{margin-top:8px} summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:13px}
+  code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px}
+  footer{color:var(--sub);font-size:12px;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>三张表财务模型 · 通用制造业示例（学习版）</h1>
+  <p>改左侧假设 → 利润表 / 资产负债表 / 现金流量表实时联动重算 · 自动勾稽校验 · 单位：万元</p>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <!-- ============ 左：假设面板 ============ -->
+    <div>
+      <div class="card">
+        <h2>🎛️ 假设驱动面板 <span class="tag">改这里</span></h2>
+        <div class="grp">
+          <div class="grp-title">增长与盈利</div>
+          <div class="row"><label>基期营业收入</label><input id="rev0" type="number" value="1000"></div>
+          <div class="row"><label>收入年增长率 %</label><input id="g" type="number" value="10" step="0.5"></div>
+          <div class="row"><label>毛利率 %</label><input id="gm" type="number" value="30" step="0.5"></div>
+          <div class="row"><label>税金及附加率 %</label><input id="taxAddRate" type="number" value="1" step="0.1"></div>
+          <div class="row"><label>销售费用率 %</label><input id="sellRate" type="number" value="5" step="0.5"></div>
+          <div class="row"><label>管理费用率 %</label><input id="adminRate" type="number" value="4" step="0.5"></div>
+          <div class="row"><label>研发费用率 %</label><input id="rdRate" type="number" value="3" step="0.5"></div>
+          <div class="row"><label>所得税率 %</label><input id="taxRate" type="number" value="25" step="1"></div>
+        </div>
+        <div class="grp">
+          <div class="grp-title">营运资本（周转天数）</div>
+          <div class="row"><label>应收账款天数</label><input id="dso" type="number" value="60" step="1"></div>
+          <div class="row"><label>存货天数</label><input id="dio" type="number" value="90" step="1"></div>
+          <div class="row"><label>应付账款天数</label><input id="dpo" type="number" value="45" step="1"></div>
+        </div>
+        <div class="grp">
+          <div class="grp-title">长期资产与融资</div>
+          <div class="row"><label>固定资产原值(基期)</label><input id="grossPPE0" type="number" value="1000"></div>
+          <div class="row"><label>固定资产净值(基期)</label><input id="netPPE0" type="number" value="800"></div>
+          <div class="row"><label>资本开支率 %</label><input id="capexRate" type="number" value="8" step="0.5"></div>
+          <div class="row"><label>折旧年限(年)</label><input id="depYears" type="number" value="10" step="1"></div>
+          <div class="row"><label>借款(基期)</label><input id="debt0" type="number" value="300"></div>
+          <div class="row"><label>借款利率 %</label><input id="i" type="number" value="5" step="0.5"></div>
+          <div class="row"><label>分红率 %</label><input id="payout" type="number" value="30" step="1"></div>
+        </div>
+        <div class="grp">
+          <div class="grp-title">基期资产负债</div>
+          <div class="row"><label>货币资金(基期)</label><input id="cash0" type="number" value="200"></div>
+          <div class="row"><label>股本</label><input id="share0" type="number" value="500"></div>
+          <div class="row"><label>预测年数</label><input id="years" type="number" value="5" step="1" min="1" max="15"></div>
+        </div>
+        <div class="btns">
+          <button class="btn-primary" id="btnReset">重置默认值</button>
+          <button class="btn-ghost2" id="btnCsv">导出 CSV</button>
+        </div>
+        <div class="note">留存收益(基期) 由「资产=负债+权益」自动倒算，保证起始平衡。</div>
+      </div>
+    </div>
+
+    <!-- ============ 右：输出 ============ -->
+    <div>
+      <!-- 概念与联动图 -->
+      <div class="card intro">
+        <h2>📐 三张表是什么 & 怎么连 <span class="tag">先搞懂</span></h2>
+        <div class="analogy">
+          <b>利润表</b> = 一段时间「赚了多少」的<b>录像</b>（看趋势）；<br>
+          <b>资产负债表</b> = 某一时刻「家底多厚」的<b>照片</b>（看存量）；<br>
+          <b>现金流量表</b> = 同期「真金白银进出」的<b>银行流水</b>（看钱是否真到手）。
+        </div>
+        <div id="linkDiagram"></div>
+        <details>
+          <summary>展开：三条核心勾稽链（建模的灵魂）</summary>
+          <p class="note">
+          ① <b>利润表 → 资产负债表</b>：本年净利润（扣分红后）滚入「留存收益」。<br>
+          ② <b>现金流量表 → 资产负债表</b>：现金净变动加到「货币资金」上。<br>
+          ③ <b>资产负债表 → 利润表</b>：折旧（减净值）计费用、借款利息计财务费用、应收/存货/应付的<b>变动</b>在现金流里调整。<br>
+          ④ <b>资产负债表 → 现金流量表</b>：资本开支是投资现金流出，分红是筹资现金流出。<br>
+          只要这四条链写对，三张表必然「勾稽平衡」——这正是下面校验面板的含义。
+          </p>
+        </details>
+      </div>
+
+      <!-- 三张表 -->
+      <div class="card">
+        <h2>📊 三张财务报表 <span class="tag">实时联动</span></h2>
+        <div class="tabs">
+          <div class="tab active" data-t="is">利润表</div>
+          <div class="tab" data-t="bs">资产负债表</div>
+          <div class="tab" data-t="cf">现金流量表</div>
+        </div>
+        <div id="tblIS"></div>
+        <div id="tblBS" style="display:none"></div>
+        <div id="tblCF" style="display:none"></div>
+      </div>
+
+      <!-- 勾稽校验 + 比率 -->
+      <div class="card">
+        <h2>✅ 勾稽校验 & 关键比率 <span class="tag">自检</span></h2>
+        <div class="checks" id="checks"></div>
+        <div class="ratios" id="ratios" style="margin-top:12px"></div>
+        <div class="note">颜色含义：<span class="pill g">绿</span>健康 / <span class="pill y">黄</span>关注 / <span class="pill r">红</span>预警（仅为学习示意阈值）。</div>
+      </div>
+
+      <!-- 趋势图 -->
+      <div class="card">
+        <h2>📈 趋势图 <span class="tag">直观</span></h2>
+        <div class="chart-wrap">
+          <div>
+            <div id="chartRev"></div>
+            <div class="legend"><span><i style="background:var(--rev)"></i>营业收入(柱)</span><span><i style="background:var(--net)"></i>归母净利润(线)</span></div>
+          </div>
+          <div>
+            <div id="chartCash"></div>
+            <div class="legend"><span><i style="background:var(--cfo)"></i>经营现金流</span><span><i style="background:var(--cfi)"></i>投资现金流</span><span><i style="background:var(--cff)"></i>筹资现金流</span><span><i style="background:var(--cash)"></i>期末现金</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>通用制造业示例模型 · 仅供学习财务建模逻辑，数字为示意假设，不构成任何投资建议。</footer>
+</div>
+
+<script>
+/* ---------- 默认假设（用于重置） ---------- */
+const DEFAULTS = {rev0:1000,g:10,gm:30,taxAddRate:1,sellRate:5,adminRate:4,rdRate:3,taxRate:25,
+  dso:60,dio:90,dpo:45,grossPPE0:1000,netPPE0:800,capexRate:8,depYears:10,debt0:300,i:5,payout:30,
+  cash0:200,share0:500,years:5};
+
+/* ---------- 工具 ---------- */
+const $=id=>document.getElementById(id);
+function fmt(x,d=1){ if(x===null||x===undefined||isNaN(x))return '—';
+  return x.toLocaleString('zh-CN',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function pct(x,d=1){ return (x*100).toFixed(d)+'%'; }
+function readA(){ const o={}; for(const k in DEFAULTS){ o[k]=parseFloat($(k).value); if(isNaN(o[k]))o[k]=DEFAULTS[k]; }
+  // 百分比转小数
+  ['g','gm','taxAddRate','sellRate','adminRate','rdRate','taxRate','capexRate','i','payout']
+    .forEach(k=>o[k]=o[k]/100);
+  o.years=Math.max(1,Math.min(15,Math.round(o.years)));
+  return o; }
+
+/* ---------- 核心计算：三表联动 ---------- */
+function compute(a){
+  const N=a.years;
+  // 基期（t0）资产负债
+  let prev={
+    rev:a.rev0, cogs:a.rev0*(1-a.gm),
+    grossPPE:a.grossPPE0, accumDep:a.grossPPE0-a.netPPE0, netPPE:a.netPPE0,
+    cash:a.cash0,
+    ar:a.rev0*(a.dso/365), inv:a.rev0*(1-a.gm)*(a.dio/365), ap:a.rev0*(1-a.gm)*(a.dpo/365),
+    debt:a.debt0, share:a.share0
+  };
+  const baseAssets=prev.cash+prev.ar+prev.inv+prev.netPPE;
+  const baseLiab=prev.ap+prev.debt;
+  prev.re=baseAssets-baseLiab-prev.share; // 倒算留存收益
+
+  const IS=[],BS=[],CF=[];
+  // 基期 BS 行（仅资产负债）
+  const bs0={year:'基期',cash:prev.cash,ar:prev.ar,inv:prev.inv,netPPE:prev.netPPE,
+    ap:prev.ap,debt:prev.debt,share:prev.share,re:prev.re,
+    assets:baseAssets,liab:baseLiab,equity:baseLiab+ (prev.share+prev.re), diff:0};
+  BS.push(bs0);
+
+  let maxDiff=0, maxCashDiff=0, maxReDiff=0;
+  for(let t=1;t<=N;t++){
+    const rev=prev.rev*(1+a.g);
+    const cogs=rev*(1-a.gm);
+    const gp=rev-cogs;
+    const taxAdd=rev*a.taxAddRate;
+    const sell=rev*a.sellRate, admin=rev*a.adminRate, rd=rev*a.rdRate;
+    const interest=prev.debt*a.i;
+    const op=gp-taxAdd-sell-admin-rd-interest;
+    const pretax=op; // 无营业外收支
+    const tax=pretax>0?pretax*a.taxRate:0;
+    const ni=pretax-tax;
+    const div=ni>0?ni*a.payout:0;
+    // 营运资本
+    const ar=rev*(a.dso/365);
+    const inv=cogs*(a.dio/365);
+    const ap=cogs*(a.dpo/365);
+    // 固定资产
+    const capex=rev*a.capexRate;
+    const grossPPE=prev.grossPPE+capex;
+    const dep=prev.grossPPE/a.depYears; // 期初原值直线折旧
+    const accumDep=prev.accumDep+dep;
+    const netPPE=grossPPE-accumDep;
+    // 现金流（间接法）
+    const dAR=ar-prev.ar, dInv=inv-prev.inv, dAP=ap-prev.ap;
+    const cfo=ni+dep-dAR-dInv+dAP;
+    const cfi=-capex;
+    const cff=-div; // 借款不变
+    const dCash=cfo+cfi+cff;
+    const cash=prev.cash+dCash;
+    const debt=prev.debt;
+    const share=prev.share;
+    const re=prev.re+ni-div;
+
+    IS.push({year:'第'+t+'年',rev,cogs,gp,taxAdd,sell,admin,rd,interest,op,pretax,tax,ni,div,
+      np:ni /* 无少数股东 */});
+    BS.push({year:'第'+t+'年',cash,ar,inv,netPPE,ap,debt,share,re,
+      assets:cash+ar+inv+netPPE, liab:ap+debt, equity:share+re,
+      diff:(cash+ar+inv+netPPE)-(ap+debt+share+re)});
+    CF.push({year:'第'+t+'年',ni,dep,dAR,dInv,dAP,cfo,capex,cfi,div,cff,dCash,
+      begCash:prev.cash, endCash:cash});
+
+    // 校验
+    maxDiff=Math.max(maxDiff,Math.abs(BS[t].diff));
+    maxCashDiff=Math.max(maxCashDiff,Math.abs(cash-(prev.cash+dCash)));
+    maxReDiff=Math.max(maxReDiff,Math.abs(re-(prev.re+ni-div)));
+
+    prev={rev,cogs,grossPPE,accumDep,netPPE,cash,ar,inv,ap,debt,share,re};
+  }
+  return {N,IS,BS,CF,maxDiff,maxCashDiff,maxReDiff,a};
+}
+
+/* ---------- 渲染：利润表 ---------- */
+function renderIS(m){
+  const h='<thead><tr><th>利润表（万元）</th>'+m.IS.map(d=>'<th>'+d.year+'</th>').join('')+'</tr></thead>';
+  const r=(label,key,opt={})=>{ const cells=m.IS.map(d=>{
+      let v=d[key]; if(opt.sign&&v<0)v=-v; // 减项显示正数
+      return '<td class="'+(v<0?'neg':'')+'">'+(opt.paren?'('+fmt(v)+')':fmt(v))+'</td>';}).join('');
+    return '<tr'+(opt.cls?' class="'+opt.cls+'"':'')+'><td>'+label+'</td>'+cells+'</tr>'; };
+  const body='<tbody>'
+    +r('营业收入','rev')
+    +r('减：营业成本','cogs',{paren:true})
+    +r('毛利','gp',{cls:'sub-total'})
+    +r('减：税金及附加','taxAdd',{paren:true})
+    +r('减：销售费用','sell',{paren:true})
+    +r('减：管理费用','admin',{paren:true})
+    +r('减：研发费用','rd',{paren:true})
+    +r('减：财务费用（利息）','interest',{paren:true})
+    +r('营业利润','op',{cls:'sub-total'})
+    +r('利润总额','pretax',{cls:'sub-total'})
+    +r('减：所得税费用','tax',{paren:true})
+    +r('净利润','ni',{cls:'sub-total'})
+    +r('归属母公司净利润','np',{cls:'total'})
+    +'</tbody>';
+  $('tblIS').innerHTML='<table>'+h+body+'</table>';
+}
+
+/* ---------- 渲染：资产负债表 ---------- */
+function renderBS(m){
+  const cols=m.BS.map(d=>'<th>'+d.year+'</th>').join('');
+  const h='<thead><tr><th>资产负债表（万元）</th>'+cols+'</tr></thead>';
+  const r=(label,key,opt={})=>{ const cells=m.BS.map(d=>{
+      let v=d[key]; if(opt.paren)v=-v;
+      return '<td class="'+(v<0?'neg':'')+'">'+(opt.paren?'('+fmt(v)+')':fmt(v))+'</td>';}).join('');
+    return '<tr'+(opt.cls?' class="'+opt.cls+'"':'')+'><td>'+label+'</td>'+cells+'</tr>'; };
+  const body='<tbody>'
+    +'<tr><td colspan="'+(m.BS.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">资产</td></tr>'
+    +r('货币资金','cash')
+    +r('应收账款','ar')
+    +r('存货','inv')
+    +r('固定资产净值','netPPE')
+    +r('资产总计','assets',{cls:'total'})
+    +'<tr><td colspan="'+(m.BS.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">负债</td></tr>'
+    +r('应付账款','ap')
+    +r('借款','debt')
+    +r('负债合计','liab',{cls:'sub-total'})
+    +'<tr><td colspan="'+(m.BS.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">所有者权益</td></tr>'
+    +r('股本','share')
+    +r('留存收益','re')
+    +r('所有者权益合计','equity',{cls:'sub-total'})
+    +r('资产−负债−权益（应=0）','diff',{cls:'total'})
+    +'</tbody>';
+  $('tblBS').innerHTML='<table>'+h+body+'</table>';
+}
+
+/* ---------- 渲染：现金流量表 ---------- */
+function renderCF(m){
+  const cols=m.CF.map(d=>'<th>'+d.year+'</th>').join('');
+  const h='<thead><tr><th>现金流量表（万元·间接法）</th>'+cols+'</tr></thead>';
+  const r=(label,key,opt={})=>{ const cells=m.CF.map(d=>{
+      let v=d[key]; if(opt.paren)v=-v;
+      return '<td class="'+(v<0?'neg':'')+'">'+(opt.paren?'('+fmt(v)+')':fmt(v))+'</td>';}).join('');
+    return '<tr'+(opt.cls?' class="'+opt.cls+'"':'')+'><td>'+label+'</td>'+cells+'</tr>'; };
+  const body='<tbody>'
+    +'<tr><td colspan="'+(m.CF.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">经营活动</td></tr>'
+    +r('净利润','ni')
+    +r('加：折旧','dep')
+    +r('减：应收账款增加','dAR',{paren:true})
+    +r('减：存货增加','dInv',{paren:true})
+    +r('加：应付账款增加','dAP')
+    +r('经营活动现金流净额','cfo',{cls:'total'})
+    +'<tr><td colspan="'+(m.CF.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">投资活动</td></tr>'
+    +r('购建固定资产','capex',{cls:'sub-total'})
+    +r('投资活动现金流净额','cfi',{cls:'sub-total'})
+    +'<tr><td colspan="'+(m.CF.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">筹资活动</td></tr>'
+    +r('分配股利','div',{cls:'sub-total'})
+    +r('筹资活动现金流净额','cff',{cls:'sub-total'})
+    +r('现金净增加额','dCash',{cls:'total'})
+    +r('期初现金','begCash')
+    +r('期末现金','endCash',{cls:'total'})
+    +'</tbody>';
+  $('tblCF').innerHTML='<table>'+h+body+'</table>';
+}
+
+/* ---------- 渲染：勾稽校验 ---------- */
+function renderChecks(m){
+  const eps=0.5; // 容差
+  const items=[
+    {t:'资产负债表平衡',d:m.maxDiff,ok:m.maxDiff<eps,
+      s:'资产 = 负债 + 权益，最大偏差 '+fmt(m.maxDiff)},
+    {t:'现金勾稽',d:m.maxCashDiff,ok:m.maxCashDiff<eps,
+      s:'现金流量表期末现金 = 资产负债表货币资金'},
+    {t:'留存收益滚存',d:m.maxReDiff,ok:m.maxReDiff<eps,
+      s:'留存收益 = 上期 + 净利润 − 分红'},
+  ];
+  $('checks').innerHTML=items.map(it=>
+    '<div class="check"><div class="ic '+(it.ok?'ok':'no')+'">'+(it.ok?'✓':'✗')+'</div>'+
+    '<div><div>'+it.t+'</div><small>'+it.s+'</small></div></div>').join('')
+    +'<div class="check"><div class="ic '+(m.maxDiff<eps&&m.maxCashDiff<eps&&m.maxReDiff<eps?'ok':'no')+'">'+
+      (m.maxDiff<eps&&m.maxCashDiff<eps&&m.maxReDiff<eps?'✓':'✗')+'</div>'+
+    '<div><div>三表勾稽总体</div><small>'+(m.maxDiff<eps&&m.maxCashDiff<eps&&m.maxReDiff<eps?'全部通过，模型自洽':'存在偏差，请检查假设')+'</small></div></div>';
+}
+
+/* ---------- 渲染：关键比率（末年） ---------- */
+function renderRatios(m){
+  const a=m.a, N=m.N, last=m.IS[N-1], lastBS=m.BS[N], lastCF=m.CF[N-1];
+  const first=m.IS[0];
+  const gm=last.gp/last.rev;
+  const nm=last.np/last.rev;
+  const eqEnd=lastBS.equity;
+  const eqBeg=m.BS[N-1].equity;
+  const roe=last.np/((eqBeg+eqEnd)/2);
+  const cashConv=lastCF.cfo/last.np;
+  const cagr=Math.pow(last.rev/m.IS[0].rev,1/N)-1;
+  const pill=(v,good,warn)=>{ const cls=v>=good?'g':(v>=warn?'y':'r'); return '<span class="pill '+cls+'">'+
+      (cls==='g'?'健康':cls==='y'?'关注':'预警')+'</span>'; };
+  const cards=[
+    {k:'毛利率（末年）',v:pct(gm),p:pill(gm,0.30,0.20)},
+    {k:'净利率（末年）',v:pct(nm),p:pill(nm,0.12,0.06)},
+    {k:'ROE（末年）',v:pct(roe),p:pill(roe,0.15,0.08)},
+    {k:'经营现金流/净利润',v:fmt(cashConv,2)+'x',p:pill(cashConv,1.0,0.8)},
+    {k:'收入CAGR（'+N+'年）',v:pct(cagr),p:''},
+  ];
+  $('ratios').innerHTML=cards.map(c=>'<div class="ratio"><div class="k">'+c.k+c.p+'</div>'+
+    '<div class="v">'+c.v+'</div></div>').join('');
+}
+
+/* ---------- 渲染：联动示意图 ---------- */
+function renderLinkDiagram(){
+  const svg=`<svg viewBox="0 0 660 300" width="100%">
+    <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/></marker></defs>
+    <rect x="20" y="30" width="170" height="64" rx="10" fill="#eff6ff" stroke="#2563eb"/>
+    <text x="105" y="58" text-anchor="middle" font-weight="700" fill="#1e40af">利润表</text>
+    <text x="105" y="78" text-anchor="middle" font-size="11" fill="#64748b">赚了多少（录像）</text>
+
+    <rect x="245" y="110" width="170" height="64" rx="10" fill="#f0fdfa" stroke="#0e7490"/>
+    <text x="330" y="138" text-anchor="middle" font-weight="700" fill="#155e75">资产负债表</text>
+    <text x="330" y="158" text-anchor="middle" font-size="11" fill="#64748b">家底多厚（照片）</text>
+
+    <rect x="470" y="30" width="170" height="64" rx="10" fill="#fef2f2" stroke="#dc2626"/>
+    <text x="555" y="58" text-anchor="middle" font-weight="700" fill="#991b1b">现金流量表</text>
+    <text x="555" y="78" text-anchor="middle" font-size="11" fill="#64748b">真金白银（流水）</text>
+
+    <path d="M105,94 C150,120 200,130 245,140" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="150" y="118" font-size="10" fill="#475569">净利润→留存收益</text>
+    <path d="M330,110 C420,80 480,70 470,94" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="380" y="92" font-size="10" fill="#475569">资本开支→投资流出</text>
+    <path d="M555,94 C560,120 555,130 470,140" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="500" y="118" font-size="10" fill="#475569">期末现金→货币资金</text>
+    <path d="M245,142 C200,120 150,110 105,94" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+    <text x="150" y="135" font-size="10" fill="#94a3b8">折旧/利息/营运资本变动</text>
+  </svg>`;
+  $('linkDiagram').innerHTML=svg;
+}
+
+/* ---------- 渲染：趋势图（SVG） ---------- */
+function svgChart(container,series,years,opts){
+  // series: [{color,type:'bar'|'line',data:[]}]
+  const W=320,H=180,pad={l:42,r:12,t:14,b:26};
+  const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  let max=0; series.forEach(s=>s.data.forEach(v=>{ if(Math.abs(v)>max)max=Math.abs(v); }));
+  max=max*1.15||1;
+  const n=years.length;
+  const x=i=>pad.l+(n===1?iw/2:i*iw/(n-1));
+  const y=v=>pad.t+ih-(v/max)*ih;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  // grid
+  for(let g=0;g<=4;g++){ const yy=pad.t+ih*g/4; svg+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#eef2f7"/>`;
+    svg+=`<text x="${pad.l-4}" y="${yy+3}" font-size="9" fill="#94a3b8" text-anchor="end">${fmt(max*(1-g/4),0)}</text>`; }
+  // axes
+  svg+=`<line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${pad.t+ih}" stroke="#cbd5e1"/>`;
+  svg+=`<line x1="${pad.l}" y1="${pad.t+ih}" x2="${W-pad.r}" y2="${pad.t+ih}" stroke="#cbd5e1"/>`;
+  years.forEach((yr,i)=>{ svg+=`<text x="${x(i)}" y="${pad.t+ih+16}" font-size="9" fill="#64748b" text-anchor="middle">${yr}</text>`; });
+  // bars (first bar series)
+  series.forEach(s=>{
+    if(s.type==='bar'){
+      const bw=iw/n*0.5;
+      s.data.forEach((v,i)=>{ const bx=x(i)-bw/2, by=y(v), bh=pad.t+ih-by;
+        svg+=`<rect x="${bx}" y="${by}" width="${bw}" height="${Math.max(0,bh)}" fill="${s.color}" opacity="0.85"/>`; });
+    } else {
+      let d=''; s.data.forEach((v,i)=>{ d+=(i?'L':'M')+x(i)+','+y(v); });
+      svg+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2"/>`;
+      s.data.forEach((v,i)=>{ svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="2.5" fill="${s.color}"/>`; });
+    }
+  });
+  svg+=`</svg>`;
+  $(container).innerHTML=svg;
+}
+
+function renderCharts(m){
+  const yrs=m.IS.map(d=>d.year);
+  svgChart('chartRev',[
+    {type:'bar',color:'#2563eb',data:m.IS.map(d=>d.rev)},
+    {type:'line',color:'#0e7490',data:m.IS.map(d=>d.np)}
+  ],yrs);
+  svgChart('chartCash',[
+    {type:'bar',color:'#2563eb',data:m.CF.map(d=>d.cfo)},
+    {type:'bar',color:'#dc2626',data:m.CF.map(d=>d.cfi)},
+    {type:'bar',color:'#16a34a',data:m.CF.map(d=>d.cff)},
+    {type:'line',color:'#16a34a',data:m.CF.map(d=>d.endCash)}
+  ],yrs);
+}
+
+/* ---------- CSV 导出 ---------- */
+function exportCSV(m){
+  const rows=[];
+  const push=(arr)=>rows.push(arr.join(','));
+  // 利润表
+  push(['利润表（万元）',...m.IS.map(d=>d.year)]);
+  const isRows=[['营业收入','rev'],['减:营业成本','cogs'],['毛利','gp'],['减:税金及附加','taxAdd'],
+    ['减:销售费用','sell'],['减:管理费用','admin'],['减:研发费用','rd'],['减:财务费用(利息)','interest'],
+    ['营业利润','op'],['利润总额','pretax'],['减:所得税费用','tax'],['净利润','ni'],['归属母公司净利润','np']];
+  isRows.forEach(([lab,k])=>push([lab,...m.IS.map(d=>fmt(d[k],2))]));
+  push([]);
+  // 资产负债表
+  push(['资产负债表（万元）',...m.BS.map(d=>d.year)]);
+  const bsRows=[['货币资金','cash'],['应收账款','ar'],['存货','inv'],['固定资产净值','netPPE'],
+    ['资产总计','assets'],['应付账款','ap'],['借款','debt'],['负债合计','liab'],['股本','share'],
+    ['留存收益','re'],['所有者权益合计','equity'],['资产-负债-权益','diff']];
+  bsRows.forEach(([lab,k])=>push([lab,...m.BS.map(d=>fmt(d[k],2))]));
+  push([]);
+  // 现金流量表
+  push(['现金流量表（万元）',...m.CF.map(d=>d.year)]);
+  const cfRows=[['净利润','ni'],['加:折旧','dep'],['减:应收账款增加','dAR'],['减:存货增加','dInv'],
+    ['加:应付账款增加','dAP'],['经营活动现金流净额','cfo'],['购建固定资产','capex'],['投资活动现金流净额','cfi'],
+    ['分配股利','div'],['筹资活动现金流净额','cff'],['现金净增加额','dCash'],['期初现金','begCash'],['期末现金','endCash']];
+  cfRows.forEach(([lab,k])=>push([lab,...m.CF.map(d=>fmt(d[k],2))]));
+  const csv='\ufeff'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='三张表财务模型_通用制造业.csv';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+/* ---------- 主流程 ---------- */
+function run(){ const m=compute(readA());
+  renderIS(m); renderBS(m); renderCF(m); renderChecks(m); renderRatios(m); renderCharts(m);
+  window._model=m; }
+
+/* 事件绑定 */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  ['is','bs','cf'].forEach(k=>$('tbl'+k.toUpperCase()).style.display='none');
+  $('tbl'+t.dataset.t.toUpperCase()).style.display='block';
+}));
+['rev0','g','gm','taxAddRate','sellRate','adminRate','rdRate','taxRate','dso','dio','dpo',
+ 'grossPPE0','netPPE0','capexRate','depYears','debt0','i','payout','cash0','share0','years']
+ .forEach(id=>$(id).addEventListener('input',run));
+$('btnReset').addEventListener('click',()=>{ for(const k in DEFAULTS)$(k).value=DEFAULTS[k]; run(); });
+$('btnCsv').addEventListener('click',()=>exportCSV(window._model));
+
+renderLinkDiagram();
+run();
+</script>
+</body>
+</html>
