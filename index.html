@@ -30,7 +30,8 @@
   .brand .sub{margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary)}
   .brand .dot{color:var(--accent)}
   .head-right{display:flex;align-items:center;gap:14px}
-  .xlink{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--interactive);text-decoration:none;border:1px solid var(--border-visible);padding:8px 14px;border-radius:999px}
+  .xlink{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);text-decoration:none;border:1px solid var(--accent);padding:8px 14px;border-radius:999px;transition:background .15s,color .15s}
+  .xlink:hover{background:var(--accent);color:#fff}
   .xlink:hover{color:var(--text-display);border-color:var(--text-primary)}
   .theme-toggle{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-primary);
     background:transparent;border:1px solid var(--border-visible);padding:8px 14px;border-radius:999px;cursor:pointer}
@@ -127,7 +128,7 @@
     <div class="sub">通用制造业 · 学习版 · 单位 万元 · 改假设 → 三表实时联动</div>
   </div>
   <div class="head-right">
-    <a class="xlink" href="https://drrreistein.github.io/valuation/" target="_blank" rel="noopener">估值模型 ↗</a>
+    <a class="xlink" href="https://drrreistein.github.io/valuation/" target="_blank" rel="noopener">估值模型体系 ↗</a>
     <button class="theme-toggle" id="themeToggle">◐ 明暗</button>
   </div>
 </header>
