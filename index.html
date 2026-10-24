@@ -1,102 +1,144 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>三张表财务模型 · 通用制造业示例（学习版）</title>
+<title>三张表财务模型 · 通用制造业（学习版）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@400..700&family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2937; --sub:#6b7280;
-    --line:#e5e7eb; --accent:#2563eb; --accent2:#0e7490; --good:#16a34a;
-    --warn:#d97706; --bad:#dc2626; --soft:#eef2ff;
-    --rev:#2563eb; --net:#0e7490; --cash:#16a34a;
-    --cfo:#2563eb; --cfi:#dc2626; --cff:#16a34a;
+    --black:#000000; --surface:#111111; --surface-raised:#1a1a1a; --border:#222222; --border-visible:#333333;
+    --text-disabled:#666666; --text-secondary:#999999; --text-primary:#e8e8e8; --text-display:#ffffff;
+    --accent:#d71921; --accent-subtle:rgba(215,25,33,.15);
+    --success:#4a9e5c; --warning:#d4a843; --error:#d71921; --interactive:#5b9bf6;
+    --chart-grid:#222222; --mono:"Space Mono",monospace; --display:"Doto","Space Mono",monospace; --body:"Space Grotesk",system-ui,sans-serif;
+  }
+  [data-theme="light"]{
+    --black:#f5f5f5; --surface:#ffffff; --surface-raised:#f0f0f0; --border:#e8e8e8; --border-visible:#cccccc;
+    --text-disabled:#999999; --text-secondary:#666666; --text-primary:#1a1a1a; --text-display:#000000;
+    --interactive:#007aff; --chart-grid:#e8e8e8;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-    background:var(--bg);color:var(--ink);line-height:1.6;font-size:14px}
-  header{background:linear-gradient(135deg,#1e3a8a,#0e7490);color:#fff;padding:22px 26px}
-  header h1{margin:0 0 4px;font-size:21px}
-  header p{margin:0;opacity:.9;font-size:13px}
-  .wrap{max-width:1240px;margin:0 auto;padding:18px}
-  .grid{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
-  .grid>div{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow-y:auto;
-    padding-right:6px;overscroll-behavior:contain}
-  .grid>div::-webkit-scrollbar{width:8px}
-  .grid>div::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
-  @media(max-width:980px){.grid{grid-template-columns:1fr}
-    .grid>div{position:static;max-height:none;overflow-y:visible;padding-right:0}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
-    padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-  .card h2{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
-  .card h2 .tag{font-size:11px;font-weight:600;color:var(--accent);background:var(--soft);
-    padding:2px 8px;border-radius:20px}
-  .grp{margin-bottom:14px}
-  .grp-title{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.5px;
-    border-left:3px solid var(--accent);padding-left:8px;margin-bottom:8px}
-  .row{display:flex;align-items:center;justify-content:space-between;margin:6px 0}
-  .row label{font-size:13px;color:#374151}
-  .row input{width:90px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;
-    font-size:13px;text-align:right;color:var(--ink)}
-  .row input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
-  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  button{cursor:pointer;border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600}
-  .btn-primary{background:var(--accent);color:#fff}
-  .btn-ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
-  .btn-ghost2{background:#fff;color:var(--sub);border:1px solid var(--line)}
-  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-  .tab{padding:7px 14px;border-radius:20px;background:#fff;border:1px solid var(--line);
-    font-size:13px;font-weight:600;color:var(--sub);cursor:pointer}
-  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  html,body{margin:0;padding:0}
+  body{font-family:var(--body);background:var(--black);color:var(--text-primary);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased}
+  /* ---- header ---- */
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;
+    padding:32px 28px 22px;border-bottom:1px solid var(--border-visible)}
+  .brand h1{margin:0;font-family:var(--body);font-weight:500;font-size:34px;letter-spacing:-.02em;color:var(--text-display);line-height:1.05}
+  .brand .sub{margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary)}
+  .brand .dot{color:var(--accent)}
+  .head-right{display:flex;align-items:center;gap:14px}
+  .xlink{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--interactive);text-decoration:none;border:1px solid var(--border-visible);padding:8px 14px;border-radius:999px}
+  .xlink:hover{color:var(--text-display);border-color:var(--text-primary)}
+  .theme-toggle{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-primary);
+    background:transparent;border:1px solid var(--border-visible);padding:8px 14px;border-radius:999px;cursor:pointer}
+  .theme-toggle:hover{border-color:var(--text-primary)}
+  /* ---- wrap / grid ---- */
+  .wrap{max-width:1280px;margin:0 auto;padding:22px 18px 40px}
+  .grid{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+  .col{position:sticky;top:18px;max-height:calc(100vh - 36px);overflow-y:auto;padding-right:6px;overscroll-behavior:contain}
+  .col::-webkit-scrollbar{width:8px}
+  .col::-webkit-scrollbar-thumb{background:var(--border-visible);border-radius:4px}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}.col{position:static;max-height:none;overflow-y:visible;padding-right:0}}
+  /* ---- panel (card) ---- */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:18px}
+  .panel-title{font-family:var(--body);font-weight:500;font-size:18px;color:var(--text-display);margin:0 0 4px;letter-spacing:-.01em}
+  .panel-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:14px;display:block}
+  .chip{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);
+    border:1px solid var(--border-visible);border-radius:999px;padding:2px 9px;margin-left:10px;vertical-align:middle}
+  /* ---- assumption inputs ---- */
+  .grp{margin-bottom:18px}
+  .grp-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary);
+    border-left:2px solid var(--border-visible);padding-left:8px;margin-bottom:10px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:9px 0}
+  .row label{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary)}
+  .row input{flex:none;width:96px;padding:6px 8px;background:transparent;border:1px solid var(--border-visible);border-radius:8px;
+    font-family:var(--mono);font-size:13px;text-align:right;color:var(--text-display)}
+  .row input:focus{outline:none;border-color:var(--text-primary)}
+  .note{font-family:var(--body);font-size:12px;color:var(--text-secondary);margin-top:12px;line-height:1.6}
+  /* ---- buttons ---- */
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  button{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+    border-radius:999px;padding:10px 18px;border:1px solid var(--border-visible);background:transparent;color:var(--text-primary)}
+  button:hover{border-color:var(--text-primary)}
+  .btn-primary{background:var(--text-display);color:var(--black);border-color:var(--text-display)}
+  .btn-primary:hover{opacity:.88}
+  /* ---- tabs (segmented) ---- */
+  .tabs{display:inline-flex;border:1px solid var(--border-visible);border-radius:999px;padding:3px;gap:3px;margin-bottom:14px}
+  .tab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);
+    padding:8px 16px;border-radius:999px;cursor:pointer}
+  .tab.active{background:var(--text-display);color:var(--black)}
+  /* ---- tables ---- */
   table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}
-  th:first-child,td:first-child{text-align:left;white-space:nowrap}
-  thead th{background:#f8fafc;color:var(--sub);font-weight:600}
-  .sub-total{font-weight:700;background:#fbfcfe}
-  .total{font-weight:800;background:var(--soft);color:var(--accent2)}
-  .neg{color:var(--bad)}
-  .pos{color:var(--good)}
-  .note{font-size:12px;color:var(--sub);margin-top:8px}
-  .checks{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);
+    font-weight:400;text-align:right;padding:10px 12px;border-bottom:1px solid var(--border-visible)}
+  thead th:first-child{text-align:left}
+  tbody td{padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;font-family:var(--mono);font-size:13px;color:var(--text-primary)}
+  tbody td:first-child{text-align:left;font-family:var(--body);color:var(--text-primary)}
+  tbody tr:hover{background:var(--surface-raised)}
+  .sub-total td{font-weight:700;color:var(--text-display)}
+  .total td{font-weight:700;color:var(--text-display);border-top:1px solid var(--border-visible);border-bottom:1px solid var(--border-visible)}
+  .section-row td{background:var(--surface-raised);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--text-primary);font-weight:700;padding:8px 12px}
+  .neg{color:var(--accent)}
+  /* ---- checks / ratios ---- */
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media(max-width:560px){.checks{grid-template-columns:1fr}}
-  .check{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
-    display:flex;align-items:center;gap:10px}
-  .check .ic{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
-    justify-content:center;font-weight:800;color:#fff;font-size:14px;flex:none}
-  .check .ok{background:var(--good)} .check .no{background:var(--bad)}
-  .check small{color:var(--sub);display:block;font-size:11px}
-  .ratios{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:4px}
-  .ratio{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-  .ratio .k{font-size:12px;color:var(--sub)}
-  .ratio .v{font-size:18px;font-weight:800;margin-top:2px}
-  .pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;margin-left:6px}
-  .pill.g{background:#dcfce7;color:var(--good)} .pill.y{background:#fef3c7;color:var(--warn)}
-  .pill.r{background:#fee2e2;color:var(--bad)}
-  .chart-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .check{background:var(--surface-raised);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+  .check .mk{font-family:var(--mono);font-weight:700;font-size:14px;width:26px;height:26px;flex:none;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--border-visible);border-radius:6px}
+  .check.ok .mk{color:var(--success);border-color:var(--success)}
+  .check.no .mk{color:var(--accent);border-color:var(--accent)}
+  .check .ttl{font-family:var(--body);font-size:13px;color:var(--text-primary)}
+  .check small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.03em;color:var(--text-secondary);margin-top:2px}
+  .ratios{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+  .ratio{background:var(--surface-raised);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+  .ratio .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary)}
+  .ratio .v{font-family:var(--mono);font-size:22px;color:var(--text-display);margin-top:6px}
+  .pill{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-left:6px;border:1px solid var(--border-visible)}
+  .pill.g{color:var(--success);border-color:var(--success)}
+  .pill.y{color:var(--warning);border-color:var(--warning)}
+  .pill.r{color:var(--accent);border-color:var(--accent)}
+  /* ---- charts ---- */
+  .chart-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   @media(max-width:760px){.chart-wrap{grid-template-columns:1fr}}
-  .legend{font-size:12px;color:var(--sub);margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}
-  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:middle}
-  .intro p{margin:6px 0}
-  .analogy{background:var(--soft);border-radius:10px;padding:12px 14px;font-size:13px;margin:10px 0}
-  .analogy b{color:var(--accent2)}
-  svg text{font-family:inherit}
-  details{margin-top:8px} summary{cursor:pointer;font-weight:600;color:var(--accent);font-size:13px}
-  code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12px}
-  footer{color:var(--sub);font-size:12px;text-align:center;padding:18px}
+  .legend{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--text-secondary);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;text-transform:uppercase}
+  .legend i{display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:middle}
+  /* ---- analogy / callout ---- */
+  .analogy{border:1px solid var(--border);border-left:2px solid var(--border-visible);border-radius:8px;padding:14px 16px;font-size:13px;margin:14px 0;line-height:1.7}
+  .analogy b{color:var(--text-display)}
+  /* ---- details ---- */
+  details{margin-top:12px;border-top:1px solid var(--border)}
+  summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);
+    padding:12px 0;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary:hover{color:var(--text-primary)}
+  code{font-family:var(--mono);background:var(--surface-raised);padding:1px 5px;border-radius:4px;font-size:12px;color:var(--text-primary)}
+  svg text{font-family:var(--mono)}
+  footer{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-disabled);text-align:center;padding:24px 0 8px}
 </style>
 </head>
 <body>
 <header>
-  <h1>三张表财务模型 · 通用制造业示例（学习版）</h1>
-  <p>改左侧假设 → 利润表 / 资产负债表 / 现金流量表实时联动重算 · 自动勾稽校验 · 单位：万元</p>
+  <div class="brand">
+    <h1>三张表财务模型<span class="dot">.</span></h1>
+    <div class="sub">通用制造业 · 学习版 · 单位 万元 · 改假设 → 三表实时联动</div>
+  </div>
+  <div class="head-right">
+    <a class="xlink" href="https://drrreistein.github.io/valuation/" target="_blank" rel="noopener">估值模型 ↗</a>
+    <button class="theme-toggle" id="themeToggle">◐ 明暗</button>
+  </div>
 </header>
 
 <div class="wrap">
   <div class="grid">
     <!-- ============ 左：假设面板 ============ -->
-    <div>
-      <div class="card">
-        <h2>🎛️ 假设驱动面板 <span class="tag">改这里</span></h2>
+    <div class="col">
+      <div class="panel">
+        <h2 class="panel-title">假设驱动面板<span class="chip">改这里</span></h2>
+        <span class="panel-kicker">ASSUMPTIONS</span>
         <div class="grp">
           <div class="grp-title">增长与盈利</div>
           <div class="row"><label>基期营业收入</label><input id="rev0" type="number" value="1000"></div>
@@ -132,17 +174,18 @@
         </div>
         <div class="btns">
           <button class="btn-primary" id="btnReset">重置默认值</button>
-          <button class="btn-ghost2" id="btnCsv">导出 CSV</button>
+          <button id="btnCsv">导出 CSV</button>
         </div>
-        <div class="note">留存收益(基期) 由「资产=负债+权益」自动倒算，保证起始平衡。</div>
+        <div class="note">留存收益（基期）由「资产 = 负债 + 权益」自动倒算，保证起始平衡。</div>
       </div>
     </div>
 
     <!-- ============ 右：输出 ============ -->
-    <div>
+    <div class="col">
       <!-- 概念与联动图 -->
-      <div class="card intro">
-        <h2>📐 三张表是什么 & 怎么连 <span class="tag">先搞懂</span></h2>
+      <div class="panel">
+        <h2 class="panel-title">三张表是什么 & 怎么连<span class="chip">先搞懂</span></h2>
+        <span class="panel-kicker">CONCEPT & LINKAGE</span>
         <div class="analogy">
           <b>利润表</b> = 一段时间「赚了多少」的<b>录像</b>（看趋势）；<br>
           <b>资产负债表</b> = 某一时刻「家底多厚」的<b>照片</b>（看存量）；<br>
@@ -162,8 +205,9 @@
       </div>
 
       <!-- 公式速查 -->
-      <div class="card">
-        <h2>📐 公式速查表 <span class="tag">三表 + 勾稽 + 比率</span></h2>
+      <div class="panel">
+        <h2 class="panel-title">公式速查表<span class="chip">三表 + 勾稽 + 比率</span></h2>
+        <span class="panel-kicker">FORMULAS</span>
         <p class="note">单位：万元。左侧面板以「%」输入的假设（毛利率、各项费率、税率、周转天数、资本开支率、分红率、利率、增长率）在代入公式前已转成小数。下标 <code>t</code> 表示第 t 年，<code>t−1</code> 表示上一年；<code>t0</code> 为基期。</p>
 
         <details open>
@@ -263,8 +307,9 @@
       </div>
 
       <!-- 三张表 -->
-      <div class="card">
-        <h2>📊 三张财务报表 <span class="tag">实时联动</span></h2>
+      <div class="panel">
+        <h2 class="panel-title">三张财务报表<span class="chip">实时联动</span></h2>
+        <span class="panel-kicker">STATEMENTS</span>
         <div class="tabs">
           <div class="tab active" data-t="is">利润表</div>
           <div class="tab" data-t="bs">资产负债表</div>
@@ -276,24 +321,26 @@
       </div>
 
       <!-- 勾稽校验 + 比率 -->
-      <div class="card">
-        <h2>✅ 勾稽校验 & 关键比率 <span class="tag">自检</span></h2>
+      <div class="panel">
+        <h2 class="panel-title">勾稽校验 & 关键比率<span class="chip">自检</span></h2>
+        <span class="panel-kicker">CHECKS & RATIOS</span>
         <div class="checks" id="checks"></div>
-        <div class="ratios" id="ratios" style="margin-top:12px"></div>
-        <div class="note">颜色含义：<span class="pill g">绿</span>健康 / <span class="pill y">黄</span>关注 / <span class="pill r">红</span>预警（仅为学习示意阈值）。</div>
+        <div class="ratios" id="ratios"></div>
+        <div class="note">状态含义：<span class="pill g">绿</span>健康 / <span class="pill y">黄</span>关注 / <span class="pill r">红</span>预警（仅为学习示意阈值）。</div>
       </div>
 
       <!-- 趋势图 -->
-      <div class="card">
-        <h2>📈 趋势图 <span class="tag">直观</span></h2>
+      <div class="panel">
+        <h2 class="panel-title">趋势图<span class="chip">直观</span></h2>
+        <span class="panel-kicker">TREND</span>
         <div class="chart-wrap">
           <div>
             <div id="chartRev"></div>
-            <div class="legend"><span><i style="background:var(--rev)"></i>营业收入(柱)</span><span><i style="background:var(--net)"></i>归母净利润(线)</span></div>
+            <div class="legend"><span><i style="background:var(--text-display)"></i>营业收入(柱)</span><span><i style="background:var(--accent)"></i>归母净利润(线)</span></div>
           </div>
           <div>
             <div id="chartCash"></div>
-            <div class="legend"><span><i style="background:var(--cfo)"></i>经营现金流</span><span><i style="background:var(--cfi)"></i>投资现金流</span><span><i style="background:var(--cff)"></i>筹资现金流</span><span><i style="background:var(--cash)"></i>期末现金</span></div>
+            <div class="legend"><span><i style="background:var(--text-display)"></i>经营现金流</span><span><i style="background:var(--text-secondary)"></i>投资现金流</span><span><i style="background:var(--text-disabled)"></i>筹资现金流</span><span><i style="background:var(--accent)"></i>期末现金</span></div>
           </div>
         </div>
       </div>
@@ -303,6 +350,19 @@
 </div>
 
 <script>
+/* ---------- 主题切换 ---------- */
+(function(){
+  const t=document.getElementById('themeToggle');
+  const saved=localStorage.getItem('ts-theme');
+  if(saved)document.documentElement.setAttribute('data-theme',saved);
+  t.addEventListener('click',()=>{
+    const cur=document.documentElement.getAttribute('data-theme');
+    const next=cur==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('ts-theme',next);
+  });
+})();
+
 /* ---------- 默认假设（用于重置） ---------- */
 const DEFAULTS = {rev0:1000,g:10,gm:30,taxAddRate:1,sellRate:5,adminRate:4,rdRate:3,taxRate:25,
   dso:60,dio:90,dpo:45,grossPPE0:1000,netPPE0:800,capexRate:8,depYears:10,debt0:300,i:5,payout:30,
@@ -428,24 +488,24 @@ function renderBS(m){
       return '<td class="'+(v<0?'neg':'')+'">'+(opt.paren?'('+fmt(v)+')':fmt(v))+'</td>';}).join('');
     return '<tr'+(opt.cls?' class="'+opt.cls+'"':'')+'><td>'+label+'</td>'+cells+'</tr>'; };
   const body='<tbody>'
-    +'<tr><td colspan="'+(m.BS.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">资产</td></tr>'
+    +'<tr class="section-row"><td colspan="'+(m.BS.length+1)+'">资产</td></tr>'
     +r('货币资金','cash')
     +r('应收账款','ar')
     +r('存货','inv')
     +r('固定资产净值','netPPE')
     +r('资产总计','assets',{cls:'total'})
-    +'<tr><td colspan="'+(m.BS.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">负债</td></tr>'
+    +'<tr class="section-row"><td colspan="'+(m.BS.length+1)+'">负债</td></tr>'
     +r('应付账款','ap')
     +r('借款','debt')
     +r('负债合计','liab',{cls:'sub-total'})
-    +'<tr><td colspan="'+(m.BS.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">所有者权益</td></tr>'
+    +'<tr class="section-row"><td colspan="'+(m.BS.length+1)+'">所有者权益</td></tr>'
     +r('股本','share')
     +r('留存收益','re')
     +r('所有者权益合计','equity',{cls:'sub-total'})
     +r('资产−负债−权益（应=0）','diff',{cls:'total'})
     +'</tbody>';
   $('tblBS').innerHTML='<table>'+h+body+'</table>'
-    +'<div class="note" style="margin-top:10px">📌 <b>「所有者权益」从哪来？</b> 权益＝股本 + 留存收益。'
+    +'<div class="note" style="margin-top:10px"><b>「所有者权益」从哪来？</b> 权益＝股本 + 留存收益。'
     +'其中<b>基期留存收益由「资产=负债+权益」倒算</b>（默认 450.68），目的是让起始资产负债表天然平衡，'
     +'它不是凭空编的，而是基期已经累计滚存下来的利润。第1年权益＝股本 500 +（基期留存 450.68 + 本年净利 129 − 分红 38.70）＝ 1040.98。</div>';
 }
@@ -459,17 +519,17 @@ function renderCF(m){
       return '<td class="'+(v<0?'neg':'')+'">'+(opt.paren?'('+fmt(v)+')':fmt(v))+'</td>';}).join('');
     return '<tr'+(opt.cls?' class="'+opt.cls+'"':'')+'><td>'+label+'</td>'+cells+'</tr>'; };
   const body='<tbody>'
-    +'<tr><td colspan="'+(m.CF.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">经营活动</td></tr>'
+    +'<tr class="section-row"><td colspan="'+(m.CF.length+1)+'">经营活动</td></tr>'
     +r('净利润','ni')
     +r('加：折旧','dep')
     +r('减：应收账款增加','dAR',{paren:true})
     +r('减：存货增加','dInv',{paren:true})
     +r('加：应付账款增加','dAP')
     +r('经营活动现金流净额','cfo',{cls:'total'})
-    +'<tr><td colspan="'+(m.CF.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">投资活动</td></tr>'
+    +'<tr class="section-row"><td colspan="'+(m.CF.length+1)+'">投资活动</td></tr>'
     +r('购建固定资产','capex',{cls:'sub-total'})
     +r('投资活动现金流净额','cfi',{cls:'sub-total'})
-    +'<tr><td colspan="'+(m.CF.length+1)+'" style="background:#f8fafc;font-weight:700;color:#374151">筹资活动</td></tr>'
+    +'<tr class="section-row"><td colspan="'+(m.CF.length+1)+'">筹资活动</td></tr>'
     +r('分配股利','div',{cls:'sub-total'})
     +r('筹资活动现金流净额','cff',{cls:'sub-total'})
     +r('现金净增加额','dCash',{cls:'total'})
@@ -477,7 +537,7 @@ function renderCF(m){
     +r('期末现金','endCash',{cls:'total'})
     +'</tbody>';
   $('tblCF').innerHTML='<table>'+h+body+'</table>'
-    +'<div class="note" style="margin-top:10px">📌 <b>为什么本表的「应收/存货」比资产负债表小那么多？</b> '
+    +'<div class="note" style="margin-top:10px"><b>为什么本表的「应收/存货」比资产负债表小那么多？</b> '
     +'资产负债表是<b>存量＝期末余额</b>（某一时点的累计数），例如第1年应收账款余额 180.82；'
     +'现金流量表是<b>流量＝本年变动额</b>，「应收增加」=本年余额−上年余额=180.82−164.38=<b>16.44</b>。'
     +'两者口径不同：余额是多年累计，增加额只是这一年多出来的部分，自然小很多。'
@@ -487,6 +547,7 @@ function renderCF(m){
 /* ---------- 渲染：勾稽校验 ---------- */
 function renderChecks(m){
   const eps=0.5; // 容差
+  const allPass = m.maxDiff<eps&&m.maxCashDiff<eps&&m.maxReDiff<eps;
   const items=[
     {t:'资产负债表平衡',d:m.maxDiff,ok:m.maxDiff<eps,
       s:'资产 = 负债 + 权益，最大偏差 '+fmt(m.maxDiff)},
@@ -496,11 +557,10 @@ function renderChecks(m){
       s:'留存收益 = 上期 + 净利润 − 分红'},
   ];
   $('checks').innerHTML=items.map(it=>
-    '<div class="check"><div class="ic '+(it.ok?'ok':'no')+'">'+(it.ok?'✓':'✗')+'</div>'+
-    '<div><div>'+it.t+'</div><small>'+it.s+'</small></div></div>').join('')
-    +'<div class="check"><div class="ic '+(m.maxDiff<eps&&m.maxCashDiff<eps&&m.maxReDiff<eps?'ok':'no')+'">'+
-      (m.maxDiff<eps&&m.maxCashDiff<eps&&m.maxReDiff<eps?'✓':'✗')+'</div>'+
-    '<div><div>三表勾稽总体</div><small>'+(m.maxDiff<eps&&m.maxCashDiff<eps&&m.maxReDiff<eps?'全部通过，模型自洽':'存在偏差，请检查假设')+'</small></div></div>';
+    '<div class="check '+(it.ok?'ok':'no')+'"><div class="mk">'+(it.ok?'✓':'✗')+'</div>'+
+    '<div><div class="ttl">'+it.t+'</div><small>'+it.s+'</small></div></div>').join('')
+    +'<div class="check '+(allPass?'ok':'no')+'"><div class="mk">'+(allPass?'✓':'✗')+'</div>'+
+    '<div><div class="ttl">三表勾稽总体</div><small>'+(allPass?'全部通过，模型自洽':'存在偏差，请检查假设')+'</small></div></div>';
 }
 
 /* ---------- 渲染：关键比率（末年） ---------- */
@@ -527,36 +587,36 @@ function renderRatios(m){
     '<div class="v">'+c.v+'</div></div>').join('');
 }
 
-/* ---------- 渲染：联动示意图 ---------- */
+/* ---------- 渲染：联动示意图（单色） ---------- */
 function renderLinkDiagram(){
   const svg=`<svg viewBox="0 0 660 300" width="100%">
     <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
-      <path d="M0,0 L7,3 L0,6 Z" fill="#475569"/></marker></defs>
-    <rect x="20" y="30" width="170" height="64" rx="10" fill="#eff6ff" stroke="#2563eb"/>
-    <text x="105" y="58" text-anchor="middle" font-weight="700" fill="#1e40af">利润表</text>
-    <text x="105" y="78" text-anchor="middle" font-size="11" fill="#64748b">赚了多少（录像）</text>
+      <path d="M0,0 L7,3 L0,6 Z" style="fill:var(--text-secondary)"/></marker></defs>
+    <rect x="20" y="30" width="170" height="64" rx="10" style="fill:var(--surface-raised);stroke:var(--border-visible)"/>
+    <text x="105" y="58" text-anchor="middle" font-family="var(--body)" font-weight="500" style="fill:var(--text-display)">利润表</text>
+    <text x="105" y="78" text-anchor="middle" font-size="11" style="fill:var(--text-secondary)">赚了多少（录像）</text>
 
-    <rect x="245" y="110" width="170" height="64" rx="10" fill="#f0fdfa" stroke="#0e7490"/>
-    <text x="330" y="138" text-anchor="middle" font-weight="700" fill="#155e75">资产负债表</text>
-    <text x="330" y="158" text-anchor="middle" font-size="11" fill="#64748b">家底多厚（照片）</text>
+    <rect x="245" y="110" width="170" height="64" rx="10" style="fill:var(--surface-raised);stroke:var(--border-visible)"/>
+    <text x="330" y="138" text-anchor="middle" font-family="var(--body)" font-weight="500" style="fill:var(--text-display)">资产负债表</text>
+    <text x="330" y="158" text-anchor="middle" font-size="11" style="fill:var(--text-secondary)">家底多厚（照片）</text>
 
-    <rect x="470" y="30" width="170" height="64" rx="10" fill="#fef2f2" stroke="#dc2626"/>
-    <text x="555" y="58" text-anchor="middle" font-weight="700" fill="#991b1b">现金流量表</text>
-    <text x="555" y="78" text-anchor="middle" font-size="11" fill="#64748b">真金白银（流水）</text>
+    <rect x="470" y="30" width="170" height="64" rx="10" style="fill:var(--surface-raised);stroke:var(--accent)"/>
+    <text x="555" y="58" text-anchor="middle" font-family="var(--body)" font-weight="500" style="fill:var(--text-display)">现金流量表</text>
+    <text x="555" y="78" text-anchor="middle" font-size="11" style="fill:var(--text-secondary)">真金白银（流水）</text>
 
-    <path d="M105,94 C150,120 200,130 245,140" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
-    <text x="150" y="118" font-size="10" fill="#475569">净利润→留存收益</text>
-    <path d="M330,110 C420,80 480,70 470,94" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
-    <text x="380" y="92" font-size="10" fill="#475569">资本开支→投资流出</text>
-    <path d="M555,94 C560,120 555,130 470,140" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#ar)"/>
-    <text x="500" y="118" font-size="10" fill="#475569">期末现金→货币资金</text>
-    <path d="M245,142 C200,120 150,110 105,94" fill="none" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
-    <text x="150" y="135" font-size="10" fill="#94a3b8">折旧/利息/营运资本变动</text>
+    <path d="M105,94 C150,120 200,130 245,140" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="150" y="118" font-size="10" style="fill:var(--text-secondary)">净利润→留存收益</text>
+    <path d="M330,110 C420,80 480,70 470,94" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="380" y="92" font-size="10" style="fill:var(--text-secondary)">资本开支→投资流出</text>
+    <path d="M555,94 C560,120 555,130 470,140" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" marker-end="url(#ar)"/>
+    <text x="500" y="118" font-size="10" style="fill:var(--text-secondary)">期末现金→货币资金</text>
+    <path d="M245,142 C200,120 150,110 105,94" fill="none" stroke="var(--border-visible)" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+    <text x="150" y="135" font-size="10" style="fill:var(--text-disabled)">折旧/利息/营运资本变动</text>
   </svg>`;
   $('linkDiagram').innerHTML=svg;
 }
 
-/* ---------- 渲染：趋势图（SVG） ---------- */
+/* ---------- 渲染：趋势图（SVG，单色 + 唯一强调红） ---------- */
 function svgChart(container,series,years,opts){
   // series: [{color,type:'bar'|'line',data:[]}]
   const W=320,H=180,pad={l:42,r:12,t:14,b:26};
@@ -567,23 +627,23 @@ function svgChart(container,series,years,opts){
   const x=i=>pad.l+(n===1?iw/2:i*iw/(n-1));
   const y=v=>pad.t+ih-(v/max)*ih;
   let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
-  // grid
-  for(let g=0;g<=4;g++){ const yy=pad.t+ih*g/4; svg+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#eef2f7"/>`;
-    svg+=`<text x="${pad.l-4}" y="${yy+3}" font-size="9" fill="#94a3b8" text-anchor="end">${fmt(max*(1-g/4),0)}</text>`; }
+  // grid (horizontal only)
+  for(let g=0;g<=4;g++){ const yy=pad.t+ih*g/4; svg+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" style="stroke:var(--chart-grid)"/>`;
+    svg+=`<text x="${pad.l-4}" y="${yy+3}" font-size="9" style="fill:var(--text-disabled)" text-anchor="end">${fmt(max*(1-g/4),0)}</text>`; }
   // axes
-  svg+=`<line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${pad.t+ih}" stroke="#cbd5e1"/>`;
-  svg+=`<line x1="${pad.l}" y1="${pad.t+ih}" x2="${W-pad.r}" y2="${pad.t+ih}" stroke="#cbd5e1"/>`;
-  years.forEach((yr,i)=>{ svg+=`<text x="${x(i)}" y="${pad.t+ih+16}" font-size="9" fill="#64748b" text-anchor="middle">${yr}</text>`; });
-  // bars (first bar series)
+  svg+=`<line x1="${pad.l}" y1="${pad.t}" x2="${pad.l}" y2="${pad.t+ih}" style="stroke:var(--border-visible)"/>`;
+  svg+=`<line x1="${pad.l}" y1="${pad.t+ih}" x2="${W-pad.r}" y2="${pad.t+ih}" style="stroke:var(--border-visible)"/>`;
+  years.forEach((yr,i)=>{ svg+=`<text x="${x(i)}" y="${pad.t+ih+16}" font-size="9" style="fill:var(--text-secondary)" text-anchor="middle">${yr}</text>`; });
+  // bars
   series.forEach(s=>{
     if(s.type==='bar'){
       const bw=iw/n*0.5;
       s.data.forEach((v,i)=>{ const bx=x(i)-bw/2, by=y(v), bh=pad.t+ih-by;
-        svg+=`<rect x="${bx}" y="${by}" width="${bw}" height="${Math.max(0,bh)}" fill="${s.color}" opacity="0.85"/>`; });
+        svg+=`<rect x="${bx}" y="${by}" width="${bw}" height="${Math.max(0,bh)}" style="fill:${s.color}" opacity="${s.opacity||0.85}"/>`; });
     } else {
       let d=''; s.data.forEach((v,i)=>{ d+=(i?'L':'M')+x(i)+','+y(v); });
-      svg+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2"/>`;
-      s.data.forEach((v,i)=>{ svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="2.5" fill="${s.color}"/>`; });
+      svg+=`<path d="${d}" fill="none" style="stroke:${s.color}" stroke-width="2"/>`;
+      s.data.forEach((v,i)=>{ svg+=`<circle cx="${x(i)}" cy="${y(v)}" r="2.5" style="fill:${s.color}"/>`; });
     }
   });
   svg+=`</svg>`;
@@ -593,14 +653,14 @@ function svgChart(container,series,years,opts){
 function renderCharts(m){
   const yrs=m.IS.map(d=>d.year);
   svgChart('chartRev',[
-    {type:'bar',color:'#2563eb',data:m.IS.map(d=>d.rev)},
-    {type:'line',color:'#0e7490',data:m.IS.map(d=>d.np)}
+    {type:'bar',color:'var(--text-display)',opacity:0.85,data:m.IS.map(d=>d.rev)},
+    {type:'line',color:'var(--accent)',data:m.IS.map(d=>d.np)}
   ],yrs);
   svgChart('chartCash',[
-    {type:'bar',color:'#2563eb',data:m.CF.map(d=>d.cfo)},
-    {type:'bar',color:'#dc2626',data:m.CF.map(d=>d.cfi)},
-    {type:'bar',color:'#16a34a',data:m.CF.map(d=>d.cff)},
-    {type:'line',color:'#16a34a',data:m.CF.map(d=>d.endCash)}
+    {type:'bar',color:'var(--text-display)',opacity:0.9,data:m.CF.map(d=>d.cfo)},
+    {type:'bar',color:'var(--text-secondary)',opacity:0.9,data:m.CF.map(d=>d.cfi)},
+    {type:'bar',color:'var(--text-disabled)',opacity:0.9,data:m.CF.map(d=>d.cff)},
+    {type:'line',color:'var(--accent)',data:m.CF.map(d=>d.endCash)}
   ],yrs);
 }
 
